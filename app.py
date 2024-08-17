@@ -1,7 +1,30 @@
+from datetime import datetime
 import pybaseball
 from pybaseball import schedule_and_record, pitching
 from pybaseball import statcast
+from pybaseball import team_ids
+from pybaseball import cache
 import pandas as pd
+import numpy as np
+from pybaseball import schedule_and_record
+
+cache.enable()
+
+### for each game in today's baseball slate,
+#teams = team_ids(2024, 'NL')
+#todaysGames = schedule_and_record(2024, { teams })
+
+
+tempTeams = team_ids()
+latestTeamsYear = tempTeams['yearID'].max()
+teams = team_ids(latestTeamsYear)
+
+for index, row in teams.iterrows():
+    #team_name = row['teamName']
+    team_id = row['teamIDBR']
+    print(f"Team ID: { team_id }")
+
+
 
 data = statcast('2024-03-01', '2024-08-15', team='DET')
 yesterdayGame = data[(data.game_date == '2024-08-14')]
