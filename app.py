@@ -22,6 +22,9 @@ teams = team_ids(latestTeamsYear)
 for index, row in teams.iterrows():
     #team_name = row['teamName']
     team_id = row['teamIDBR']
+
+
+
     print(f"Team ID: { team_id }")
 
 
