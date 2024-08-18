@@ -10,7 +10,7 @@ from pybaseball import schedule_and_record
 from torch.fx.experimental.migrate_gradual_types.constraint_transformation import no_broadcast_dim_with_index
 
 cache.enable()
-#test = schedule_and_record(2024, 'SDP')
+test = schedule_and_record(2024, 'BAL')
 #test2 = test[test['Date'].str.contains('Thursday, Apr 4')]
 
 ### Get today's date
@@ -32,9 +32,6 @@ for index, row in teams.iterrows():
     team_games_today = team_games_today.rename(columns={"Tm": "Home_Team", "Opp": "Away_Team"})
     team_games_today = team_games_today.drop(columns=['Home_Away', 'W/L'])
 
-#    if team_games_today['Home_Away'].eq('Home').any():
-#        print("Home")
-
     ### Add the games to the list if any are found.
     if not team_games_today.empty:
         todays_games.append(team_games_today)
@@ -43,15 +40,18 @@ for index, row in teams.iterrows():
 if todays_games:
     todays_games_df = pd.concat(todays_games, ignore_index=True)
 else:
-    todays_games_df = pd.DataFrame(columns=['Date', 'Opp', 'W/L', 'R', 'RA', 'Inn', 'Rank', 'GB', 'Win', 'Loss', 'Save', 'Time', 'D/N', 'Attendance', 'Streak', 'Orig. Scheduled'])
+    todays_games_df = pd.DataFrame(columns=['Date', 'HomeTeam', 'AwayTeam'])
 
+######################################################################
 
+for index, row in todays_games_df.iterrows():
+    homeTeam = row['Home_Team']
+    awayTeam = row['Away_Team']
 
-
-
-
-#    stop=1
-
+    firstGame = schedule_and_record(datetime.now().year, homeTeam)._get_value(schedule_and_record(datetime.now().year, homeTeam).index.min(), "Date")
+    firstGame = datetime.today().strftime('%Y-') + datetime.strptime(firstGame, '%A, %b %d').strftime('%m-%d')
+    homeTeamStats = statcast(firstGame, datetime.today().strftime('%Y-%m-%d'), homeTeam)
+    firstInningStats = homeTeamStats[(homeTeamStats.inning == 1)]
 
 #    todaysGames = schedule_and_record(datetime.now().year, team = team_id)[(schedule_and_record(datetime.now().year, team = team_id).Date == f'{ datetime.now().strftime("%A") }, { datetime.now().strftime("%b") } { datetime.today().strftime("%d") }')]
 
