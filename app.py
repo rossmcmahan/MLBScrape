@@ -7,25 +7,57 @@ from pybaseball import cache
 import pandas as pd
 import numpy as np
 from pybaseball import schedule_and_record
+from torch.fx.experimental.migrate_gradual_types.constraint_transformation import no_broadcast_dim_with_index
 
 cache.enable()
+#test = schedule_and_record(2024, 'SDP')
+#test2 = test[test['Date'].str.contains('Thursday, Apr 4')]
 
-### for each game in today's baseball slate,
-#teams = team_ids(2024, 'NL')
-#todaysGames = schedule_and_record(2024, { teams })
+### Get today's date
+today = datetime.today().strftime('%A, %b %d')
 
+### Get the list of MLB Teams
+teams = team_ids(team_ids()['yearID'].max())
 
-tempTeams = team_ids()
-latestTeamsYear = tempTeams['yearID'].max()
-teams = team_ids(latestTeamsYear)
+### Initialize an empty list to store today's games
+todays_games = []
 
+### Loop through each team and get their schedule to populate today's schedule
 for index, row in teams.iterrows():
-    #team_name = row['teamName']
     team_id = row['teamIDBR']
+    team_schedule = schedule_and_record(datetime.now().year, team_id)
+    team_home_schedule = team_schedule[team_schedule['Home_Away'].str.contains('Home')]
+    ### Filter the games for today's schedule
+    team_games_today = team_home_schedule[team_home_schedule['Date'].str.contains(today, case=False)].iloc[:, : 5]
+    team_games_today = team_games_today.rename(columns={"Tm": "Home_Team", "Opp": "Away_Team"})
+    team_games_today = team_games_today.drop(columns=['Home_Away', 'W/L'])
+
+#    if team_games_today['Home_Away'].eq('Home').any():
+#        print("Home")
+
+    ### Add the games to the list if any are found.
+    if not team_games_today.empty:
+        todays_games.append(team_games_today)
+
+### Convert the list of DataFrames into a single DataFrame
+if todays_games:
+    todays_games_df = pd.concat(todays_games, ignore_index=True)
+else:
+    todays_games_df = pd.DataFrame(columns=['Date', 'Opp', 'W/L', 'R', 'RA', 'Inn', 'Rank', 'GB', 'Win', 'Loss', 'Save', 'Time', 'D/N', 'Attendance', 'Streak', 'Orig. Scheduled'])
 
 
 
-    print(f"Team ID: { team_id }")
+
+
+
+#    stop=1
+
+
+#    todaysGames = schedule_and_record(datetime.now().year, team = team_id)[(schedule_and_record(datetime.now().year, team = team_id).Date == f'{ datetime.now().strftime("%A") }, { datetime.now().strftime("%b") } { datetime.today().strftime("%d") }')]
+
+#    yesterdaysResults = statcast(team = team_id)
+
+#    print(f"Team ID: { team_id }")
 
 
 
