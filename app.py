@@ -28,8 +28,9 @@ for index, row in teams.iterrows():
     team_schedule = schedule_and_record(datetime.now().year, team_id)
     team_home_schedule = team_schedule[team_schedule['Home_Away'].str.contains('Home')]
     ### Filter the games for today's schedule
-    team_games_today = team_schedule[team_schedule['Date'].str.contains(today, case=False)].iloc[:, : 5]
-
+    team_games_today = team_home_schedule[team_home_schedule['Date'].str.contains(today, case=False)].iloc[:, : 5]
+    team_games_today = team_games_today.rename(columns={"Tm": "Home_Team", "Opp": "Away_Team"})
+    team_games_today = team_games_today.drop(columns=['Home_Away', 'W/L'])
 
 #    if team_games_today['Home_Away'].eq('Home').any():
 #        print("Home")
@@ -43,6 +44,10 @@ if todays_games:
     todays_games_df = pd.concat(todays_games, ignore_index=True)
 else:
     todays_games_df = pd.DataFrame(columns=['Date', 'Opp', 'W/L', 'R', 'RA', 'Inn', 'Rank', 'GB', 'Win', 'Loss', 'Save', 'Time', 'D/N', 'Attendance', 'Streak', 'Orig. Scheduled'])
+
+
+
+
 
 
 #    stop=1
